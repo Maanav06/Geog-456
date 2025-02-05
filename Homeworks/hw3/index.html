@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head> 
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>London Icons Map</title>
+    <h1>Maanav Jariwala</h1>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.6.0/dist/leaflet.css"
+    integrity="sha512-xwE/Az9zrjBIphAcBb3F6JVqxf46+CDLwfLMHloNu6KEQCAWi6HcDUbeOfBIptF7tcCzusKFjFw2yuvEpDL9wQ=="
+    crossorigin=""/>
+
+    <script src="https://unpkg.com/leaflet@1.6.0/dist/leaflet.js"
+    integrity="sha512-gZwIG9x3wUXg2hdXF6+rVkLF/0Vi9U8D2Ntg4Ga5I5BZpVkVxlJWbSQtXPSiUTtC0TjtGOmxa1AJPuV0CPthew=="
+    crossorigin=""></script>
+</head>
+
+<body>
+    <div id="map"></div>
+    <style>
+        #map {
+            height: 900px;
+            width: 900px;
+            margin: 0 auto;
+            border: 2px solid black;
+        }
+    </style>
+
+    <script>
+        var map = L.map('map').setView([28.417, -81.581], 12); // Centered around Disney World
+
+        var streetMap = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; OpenStreetMap contributors'
+        }).addTo(map);
+
+        var satelliteMap = L.tileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; OpenTopoMap contributors'
+        });
+
+        var customIcon = L.icon({
+            iconUrl: "https://cdn-icons-png.flaticon.com/512/684/684908.png",
+            iconSize: [50, 50], 
+            iconAnchor: [25, 50], 
+            popupAnchor: [0, -50]
+        });
+
+        fetch("https://www.arcgis.com/sharing/rest/content/items/bf2c124d239b40dc9cd840eed9853f22/data")
+            .then(response => response.json())
+            .then(data => {
+                var geojsonLayer = L.geoJSON(data, {
+                    pointToLayer: function (feature, latlng) {
+                        return L.marker(latlng, { icon: customIcon });
+                    },
+                    onEachFeature: function (feature, layer) {
+                        var popupContent = `<div style="text-align: center;">
+                            <h3>${feature.properties.name || "Unknown Location"}</h3>
+                            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/c/c8/Cinderella_Castle%2C_Magic_Kingdom_Walt_Disney_World_2024_%28square_crop%29.jpg/124px-Cinderella_Castle%2C_Magic_Kingdom_Walt_Disney_World_2024_%28square_crop%29.jpg" 
+                                 alt="Location Image" style="width: 200px; height: 100px;">
+                            <p> Disney parks are a great place to visit.</p>
+                        </div>`;
+                        layer.bindPopup(popupContent);
+                    }
+                }).addTo(map);
+
+                var baseLayers = {
+                    "Street Map": streetMap,
+                    "Satellite Map": satelliteMap
+                };
+
+                var overlayLayers = {
+                    "Points of Interest": geojsonLayer
+                };
+
+                L.control.layers(baseLayers, overlayLayers).addTo(map);
+            });
+    </script>
+</body>
+</html>
