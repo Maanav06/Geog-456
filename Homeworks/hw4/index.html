@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+
+<html lang="en"> 
+
+<head> 
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Homework 4</title>
+    <h1>Homework 4</h1>
+    <h2>By: Maanav Jariwala</h2>
+
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.6.0/dist/leaflet.css"
+    integrity="sha512-xwE/Az9zrjBIphAcBb3F6JVqxf46+CDLwfLMHloNu6KEQCAWi6HcDUbeOfBIptF7tcCzusKFjFw2yuvEpDL9wQ=="
+    crossorigin=""/>
+
+    <script src="https://unpkg.com/leaflet@1.6.0/dist/leaflet.js"
+    integrity="sha512-gZwIG9x3wUXg2hdXF6+rVkLF/0Vi9U8D2Ntg4Ga5I5BZpVkVxlJWbSQtXPSiUTtC0TjtGOmxa1AJPuV0CPthew=="
+    crossorigin=""></script>
+</head>
+
+<body>
+    <div id="map"></div>
+    <style> 
+        #map {
+            width: 100px; 
+            height: 100px;
+            margin: 0 auto; 
+            border: 2px solid black; 
+        }
+    </style>
+
+    <script src="data1.js"></script>
+    <script> 
+        var map = L.map('map').setView([35.9940, -78.8986], 13);
+
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+
+        var map = L.map('map').setView([35.9940, -78.8986], 13);
+
+        function filterByYear2018(data) {
+            return data.features.filter(record => {
+                return record.properties["Report Date"] && record.properties["Report Date"].includes("2018");
+            });
+        }
+
+        var data = filterByYear2018(data1);
+         // I do not agree with manually converting the csv to json, when we can leverage the most common use case of fetch the url and extract the response in json. that is the benefit of applying rest apis and taking advantage of parameters/query parameters. 
+        // This is super useful and important in web-developmetn. dynamic/automation. NOt to mention the data could change over time, so it is imporant to fetch up-to-date rather than importring a static json file. 
+        // will come speak to you about this in office hours because of past assignment grade. 
+        // personally, I would use .fetch and .then for to store in the data undeer a variable, but following the book I will manually convert using qgis
+        // work on also filtering if the field contains "ucr_code" key with value of True, then filter that row out and extract it. 
+
+        // once data is filtered grab the coordinates to point to layer and circle marker
+        L.geoJson({ type: "FeatureCollection", features: filteredData }).addTo(map);
+
+    </script>
+</body>
+
+</html>
