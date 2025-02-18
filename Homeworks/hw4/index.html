@@ -24,7 +24,6 @@
         #map {
             width: 500px; 
             height: 500px;
-            margin: 0 auto; 
             border: 2px solid black; 
         }
     </style>
@@ -44,13 +43,13 @@
         }
 
         var data = filterByYear2018(data1);
-         // I do not agree with manually converting the csv to json, when we can leverage the most common use case of fetch the url and extract the response in json. that is the benefit of applying rest apis and taking advantage of parameters/query parameters. 
+         //I prefer to not] manually convert the csv to geojson, when we can leverage the most common use case of fetch the url and extract the response in json. that is the benefit of applying rest apis and taking advantage of parameters/query parameters. 
         // This is super useful and important in web-developmetn. dynamic/automation. NOt to mention the data could change over time, so it is imporant to fetch up-to-date rather than importring a static json file. 
         // will come speak to you about this in office hours because of past assignment grade. 
-        // personally, I would use .fetch and .then for to store in the data undeer a variable, but following the book I will manually convert using qgis
+        // personally, I would use .fetch and .then for to store in the data undeer a variable
         // work on also filtering if the field contains "ucr_code" key with value of True, then filter that row out and extract it. 
 
-        // once data is filtered grab the coordinates to point to layer and circle marker
+        // once data is filtered grab the coordinates to point to layer and circle marker through classelement
         L.geoJson({ type: "FeatureCollection", features: filteredData }).addTo(map);
 
     </script>
