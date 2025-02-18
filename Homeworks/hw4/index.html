@@ -34,8 +34,6 @@
 
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
 
-        var map = L.map('map').setView([35.9940, -78.8986], 13);
-
         function filterByYear2018(data) {
             return data.features.filter(record => {
                 return record.properties["Report Date"] && record.properties["Report Date"].includes("2018");
