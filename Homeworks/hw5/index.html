@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Raleigh Permit Areas by Day</title>
+
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.6.0/dist/leaflet.css"
+    integrity="sha512-xwE/Az9zrjBIphAcBb3F6JVqxf46+CDLwfLMHloNu6KEQCAWi6HcDUbeOfBIptF7tcCzusKFjFw2yuvEpDL9wQ=="
+    crossorigin=""/>
+  <script src="https://unpkg.com/leaflet@1.6.0/dist/leaflet.js"
+    integrity="sha512-gZwIG9x3wUXg2hdXF6+rVkLF/0Vi9U8D2Ntg4Ga5I5BZpVkVxlJWbSQtXPSiUTtC0TjtGOmxa1AJPuV0CPthew=="
+    crossorigin=""></script>
+</head>
+
+<style>
+  body {
+    margin: 0;
+    padding: 0;
+    text-align: center;
+  }
+  h1, h2 {
+    margin: 10px 0;
+    font-size: 24px;
+    font-weight: bold;
+  }
+  #map {
+    width: 800px;
+    height: 500px;
+    margin: 20px auto;
+    border: 2px solid #444;
+  }
+
+  #sliderContainer {
+    width: 300px;
+    margin: 20px auto 5px;
+  }
+  #daySlider {
+    width: 100%;
+  }
+  #dayLabel {
+    display: block;
+    margin-top: 5px;
+    font-size: 18px;
+    font-weight: bold;
+  }
+</style>
+
+<body>
+  <h1>Raleigh Permit Areas by Day</h1>
+  <h2>By: Maanav Jariwala</h2>
+  <h2>Use the slider to choose a day</h2>
+  <h2><span style="color:blue;">Blue</span> shows Raleigh Permit Areas by Day</h2>    
+
+  <div id="sliderContainer">
+    <input type="range" id="daySlider" min="1" max="7" value="1" oninput="updatePolygons()" />
+    <span id="dayLabel">Monday</span>
+  </div>
+
+  <div id="map"></div>
+
+  <script>
+    
+    // Creating dictionary to map day number to day name for slider
+    const dayMap = {
+      1: 'Monday', 2: 'Tuesday', 3: 'Wednesday',
+      4: 'Thursday', 5: 'Friday', 6: 'Saturday', 7: 'Sunday'
+    };
+
+    const map = L.map('map').setView([35.7796, -78.6382], 12);
+    L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      maxZoom: 19,
+      attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+    }).addTo(map);
+
+    fetch('https://services.arcgis.com/v400IkDOw1ad7Yad/arcgis/rest/services/Residential_Permit_Parking_1/FeatureServer/0/query?outFields=*&where=1%3D1&f=geojson')
+      .then(resp => resp.json())
+      .then(fetchedData => {
+        data = fetchedData; 
+        updatePolygons(); 
+      })
+      .catch(err => console.error("Error fetching data:", err)); // Handle fetch error this time because had issues with pulling from rest api on raleigh website
+
+    let data; // Storing fetched GeoJSON data so i do not have to fetch it again
+    let layerGroup = L.layerGroup().addTo(map); // Group for polygons so we can clear them before updating
+
+    // Function is to basically check if a permit feature is open either every day or m-f. the value of the Days_of_Week_Daytime key was weird so i had to define the meaning
+    function isOpen(feature, day) {
+      const dayrange = feature.properties.Days_of_Week_Daytime; 
+      if (dayrange === 'All Days') return true;
+      if (dayrange === 'Monday - Friday') return ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'].includes(day);
+      return false;
+    }
+
+    function updatePolygons() {
+      const slider = document.getElementById('daySlider');
+      const day = dayMap[slider.value];
+      document.getElementById('dayLabel').textContent = day;
+      layerGroup.clearLayers(); 
+
+      data.features.forEach(feature => {
+        if (!isOpen(feature, day)) return; //preventing unnecessary processing by skipping features that are not open on the selected day as defined because some of them were null in real data set
+        if (feature.geometry.type === 'MultiLineString') {
+          feature.geometry.coordinates.forEach(ring => {
+            const latLng = ring.map(coord => [coord[1], coord[0]]);
+            L.polygon(latLng, {color: 'blue', weight: 2, fillColor: 'blue', fillOpacity: 0.2
+            }).addTo(layerGroup)
+              .bindPopup(`<b>Permit Area:</b> ${feature.properties.Permit_Area}<br/>
+                          <b>Daytime Restriction:</b> ${feature.properties.Daytime_Restriction}<br/>
+                          <b>Days:</b> ${feature.properties.Days_of_Week_Daytime}`);
+          });
+        }
+      });
+    }
+  </script>
+
+</body>
+</html>
