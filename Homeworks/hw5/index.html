@@ -81,7 +81,7 @@
       })
       .catch(err => console.error("Error fetching data:", err)); // Handle fetch error this time because had issues with pulling from rest api on raleigh website
 
-    let data; // Storing fetched GeoJSON data so i do not have to fetch it again
+    let data; 
     let layerGroup = L.layerGroup().addTo(map); // Group for polygons so we can clear them before updating
 
     // Function is to basically check if a permit feature is open either every day or m-f. the value of the Days_of_Week_Daytime key was weird so i had to define the meaning
@@ -96,21 +96,17 @@
       const slider = document.getElementById('daySlider');
       const day = dayMap[slider.value];
       document.getElementById('dayLabel').textContent = day;
-      layerGroup.clearLayers(); 
+      layerGroup.clearLayers();
 
-      data.features.forEach(feature => {
-        if (!isOpen(feature, day)) return; //preventing unnecessary processing by skipping features that are not open on the selected day as defined because some of them were null in real data set
-        if (feature.geometry.type === 'MultiLineString') {
-          feature.geometry.coordinates.forEach(ring => {
-            const latLng = ring.map(coord => [coord[1], coord[0]]);
-            L.polygon(latLng, {color: 'blue', weight: 2, fillColor: 'blue', fillOpacity: 0.2
-            }).addTo(layerGroup)
-              .bindPopup(`<b>Permit Area:</b> ${feature.properties.Permit_Area}<br/>
+      L.geoJSON(data, {
+        filter: feature => isOpen(feature, day),
+        style: {color: 'blue', fillColor: 'blue', fillOpacity: 0.2 },
+        onEachFeature: (feature, layer) => {
+          layer.bindPopup(`<b>Permit Area:</b> ${feature.properties.Permit_Area}<br/>
                           <b>Daytime Restriction:</b> ${feature.properties.Daytime_Restriction}<br/>
                           <b>Days:</b> ${feature.properties.Days_of_Week_Daytime}`);
-          });
         }
-      });
+      }).addTo(layerGroup);
     }
   </script>
 
