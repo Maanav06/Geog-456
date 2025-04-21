@@ -1,0 +1,25 @@
+{
+"type": "FeatureCollection",
+"name": "5c593278-3377-402f-9996-5fd9493e5bf92020330-1-q2t0ak.jfzpm",
+"crs": { "type": "name", "properties": { "name": "urn:ogc:def:crs:OGC:1.3:CRS84" } },
+"features": [
+{ "type": "Feature", "properties": { "OBJECTID": 1, "ADDRESS": "2101 Hillsborough Street", "CITY": "Raleigh", "COLLEGENAME": "NC State University - Main Campus" }, "geometry": { "type": "Point", "coordinates": [ -78.670986138333404, 35.787520785155699 ] } },
+{ "type": "Feature", "properties": { "OBJECTID": 2, "ADDRESS": "3800 Hillsborough Street", "CITY": "Raleigh", "COLLEGENAME": "Meredith College" }, "geometry": { "type": "Point", "coordinates": [ -78.688819967937903, 35.795579602383 ] } },
+{ "type": "Feature", "properties": { "OBJECTID": 3, "ADDRESS": "1007 Capability Road", "CITY": "Raleigh", "COLLEGENAME": "NCSU Centennial Campus" }, "geometry": { "type": "Point", "coordinates": [ -78.679341335375796, 35.774542220703196 ] } },
+{ "type": "Feature", "properties": { "OBJECTID": 4, "ADDRESS": "118 South Street", "CITY": "Raleigh", "COLLEGENAME": "Shaw University" }, "geometry": { "type": "Point", "coordinates": [ -78.6371285850269, 35.770884133970704 ] } },
+{ "type": "Feature", "properties": { "OBJECTID": 5, "ADDRESS": "1315 Oakwood Avenue", "CITY": "Raleigh", "COLLEGENAME": "St. Augustine College" }, "geometry": { "type": "Point", "coordinates": [ -78.620035343225098, 35.785452716595501 ] } },
+{ "type": "Feature", "properties": { "OBJECTID": 6, "ADDRESS": "219 S. Wingate Street", "CITY": "Wake Forest", "COLLEGENAME": "Southeastern Baptist Seminary" }, "geometry": { "type": "Point", "coordinates": [ -78.511865413257695, 35.980547190158298 ] } },
+{ "type": "Feature", "properties": { "OBJECTID": 7, "ADDRESS": "9101 Fayetteville Road", "CITY": "Wake County", "COLLEGENAME": "Wake Technical College Southern Wake Campus" }, "geometry": { "type": "Point", "coordinates": [ -78.705051436166002, 35.651326602821896 ] } },
+{ "type": "Feature", "properties": { "OBJECTID": 8, "ADDRESS": "15 E. Peace Street", "CITY": "Raleigh", "COLLEGENAME": "William Peace University" }, "geometry": { "type": "Point", "coordinates": [ -78.637731386275604, 35.7887913081954 ] } },
+{ "type": "Feature", "properties": { "OBJECTID": 9, "ADDRESS": "6600 Louisburg Rd ", "CITY": "Raleigh", "COLLEGENAME": "Wake Technical College Northern Wake Campus" }, "geometry": { "type": "Point", "coordinates": [ -78.544569569026095, 35.867196388060201 ] } },
+{ "type": "Feature", "properties": { "OBJECTID": 10, "ADDRESS": "3434 Kildaire Farm Rd", "CITY": "Cary", "COLLEGENAME": "Wake Technical College Western Wake Campus" }, "geometry": { "type": "Point", "coordinates": [ -78.7954095382498, 35.705961928284999 ] } },
+{ "type": "Feature", "properties": { "OBJECTID": 11, "ADDRESS": "2901 Holston Ln", "CITY": "Raleigh", "COLLEGENAME": "Wake Technical College Perry Health Sciences Campus" }, "geometry": { "type": "Point", "coordinates": [ -78.585799790508602, 35.7844718818912 ] } },
+{ "type": "Feature", "properties": { "OBJECTID": 12, "ADDRESS": "10908 Chapel Hill Rd", "CITY": "Morrisville", "COLLEGENAME": "Wake Technical College RTP Campus" }, "geometry": { "type": "Point", "coordinates": [ -78.834581388722597, 35.854797307270204 ] } },
+{ "type": "Feature", "properties": { "OBJECTID": 13, "ADDRESS": "321 Chapanoke Rd", "CITY": "Raleigh", "COLLEGENAME": "Wake Technical College Public Safety Education Campus" }, "geometry": { "type": "Point", "coordinates": [ -78.647605282651796, 35.734832122418901 ] } },
+{ "type": "Feature", "properties": { "OBJECTID": 14, "ADDRESS": "2200 South Wilmington Street", "CITY": "Raleigh", "COLLEGENAME": "Vernon Malone College and Career Academy" }, "geometry": { "type": "Point", "coordinates": [ -78.643189557680898, 35.752759462692097 ] } },
+{ "type": "Feature", "properties": { "OBJECTID": 15, "ADDRESS": "808 Aviation Pkwy #1100", "CITY": "Morrisville", "COLLEGENAME": "Campbell University ext." }, "geometry": { "type": "Point", "coordinates": [ -78.812470023358898, 35.835008215112602 ] } },
+{ "type": "Feature", "properties": { "OBJECTID": 16, "ADDRESS": "225 Hillsborough St", "CITY": "Raleigh", "COLLEGENAME": "Campbell University Law School" }, "geometry": { "type": "Point", "coordinates": [ -78.643121644975807, 35.780308947042698 ] } },
+{ "type": "Feature", "properties": { "OBJECTID": 17, "ADDRESS": "3200 Bush St", "CITY": "Raleigh", "COLLEGENAME": "Wake Technical College Beltline Education Center" }, "geometry": { "type": "Point", "coordinates": [ -78.613218835270899, 35.8238700586246 ] } },
+{ "type": "Feature", "properties": { "OBJECTID": 18, "ADDRESS": "519 N Industrial Dr", "CITY": "Zebulon", "COLLEGENAME": "Wake Technical College Eastern Wake Education Center" }, "geometry": { "type": "Point", "coordinates": [ -78.307134038704007, 35.828727757513001 ] } }
+]
+}

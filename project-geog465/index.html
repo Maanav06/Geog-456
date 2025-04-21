@@ -1,0 +1,1582 @@
+<!DOCTYPE html>
+
+<html lang="en"> 
+
+<head> 
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Larceny in Raleigh</title>
+    
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.6.0/dist/leaflet.css"
+    integrity="sha512-xwE/Az9zrjBIphAcBb3F6JVqxf46+CDLwfLMHloNu6KEQCAWi6HcDUbeOfBIptF7tcCzusKFjFw2yuvEpDL9wQ=="
+    crossorigin=""/>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.6.1/dist/MarkerCluster.css"/>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.6.1/dist/MarkerCluster.Default.css"/>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    
+    <style> 
+        
+        .header {
+            background-color: #2c3e50;
+            color: white;
+            padding: 12px;
+            text-align: center;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        .header h1 {
+            margin: 0;
+            font-size: 24px;
+            font-weight: 700;
+        }
+
+        .header h2 {
+            margin: 4px 0 0;
+            font-weight: 300;
+            font-size: 14px;
+            opacity: 0.8;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Roboto', sans-serif;
+            background-color: #f8f9fa;
+            color: #333;
+        }
+        
+        .content {
+            max-width: 1400px;
+            margin: 10px auto;
+            padding: 0 10px;
+        }
+        
+        .container {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            height: calc(100vh - 140px);
+        }
+        
+        #map {
+            flex: 1;
+            min-width: 600px;
+            height: calc(100vh - 140px);
+            min-height: 600px;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            border: none;
+            position: relative;
+        }
+        
+        .controls {
+            flex: 0 0 280px;
+            max-height: calc(100vh - 140px);
+            overflow-y: auto;
+        }
+
+        .panel {
+            background-color: white;
+            padding: 10px;
+            border-radius: 6px;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+            margin-bottom: 10px;
+            border-left: 3px solid #3498db;
+        }
+        
+        .panel h3 {
+            margin-top: 0;
+            margin-bottom: 6px;
+            padding-bottom: 5px;
+            border-bottom: 1px solid #f0f0f0;
+            color: #2c3e50;
+            font-size: 14px;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+        }
+        
+        .panel h3::before {
+            content: '';
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            margin-right: 6px;
+            background-size: contain;
+            background-repeat: no-repeat;
+            background-position: center;
+        }
+        
+        .panel.time-panel h3::before {
+            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%233498db"><path d="M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2M12,4A8,8 0 0,1 20,12A8,8 0 0,1 12,20A8,8 0 0,1 4,12A8,8 0 0,1 12,4M12.5,7H11V13L16.2,16.2L17,14.9L12.5,12.2V7Z"/></svg>');
+        }
+        
+        .panel.crime-panel h3::before {
+            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%23e74c3c"><path d="M12,2C17.5,2 22,6.5 22,12C22,17.5 17.5,22 12,22C6.5,22 2,17.5 2,12C2,6.5 6.5,2 12,2M12,4C7.58,4 4,7.58 4,12C4,16.42 7.58,20 12,20C16.42,20 20,16.42 20,12C20,7.58 16.42,4 12,4M7,15H17V17H7V15M10,10H14V12H10V10M7,7H17V9H7V7Z"/></svg>');
+        }
+        
+        .panel.layers-panel h3::before {
+            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%232ecc71"><path d="M12,2L2,7L12,12L22,7L12,2M2,17L12,22L22,17V12L12,17L2,12V17Z"/></svg>');
+        }
+        
+        .date-controls, .type-controls, .layer-controls {
+            margin-bottom: 6px;
+        }
+
+        .layer-controls {
+            padding-top: 8px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 3px;
+            font-weight: 500;
+            color: #444;
+            font-size: 13px;
+        }
+        
+        select, input[type="date"] {
+            width: 100%;
+            padding: 4px 8px;
+            margin: 2px 0 8px;
+            border-radius: 4px;
+            border: 1px solid #ddd;
+            font-size: 12px;
+            box-sizing: border-box;
+            transition: all 0.2s;
+            background-color: #f8f9fa;
+        }
+
+        select:focus, input:focus {
+            border-color: #3498db;
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+            background-color: #fff;
+        }
+        
+        /* Radio button styling */
+        .radio-container {
+            display: flex;
+            align-items: center;
+            margin-bottom: 4px;
+            padding: 2px 0;
+            border-radius: 4px;
+            transition: background-color 0.2s;
+        }
+        
+        .radio-container:hover {
+            background-color: #f5f7fa;
+        }
+
+        input[type="radio"] {
+            margin-right: 6px;
+            width: 15px;
+            height: 15px;
+            accent-color: #3498db;
+        }
+
+        input[type="radio"] + label {
+            width: auto;
+            padding: 0;
+            margin: 0;
+            border: none;
+            font-weight: normal;
+            font-size: 13px;
+            cursor: pointer;
+        }
+        
+        input[type="radio"]:checked + label {
+            font-weight: 500;
+            color: #3498db;
+        }
+
+        .time-categories {
+            margin: 4px 0 8px;
+            border: 1px solid #e0e0e0;
+            border-radius: 5px;
+            padding: 3px 6px;
+            background-color: #f8f9fa;
+        }
+        
+        .display-mode-container {
+            margin-top: 8px;
+            border-top: 1px solid #f0f0f0;
+            padding-top: 8px;
+        }
+        
+        .display-modes {
+            display: flex;
+            gap: 4px;
+            margin-top: 4px;
+        }
+        
+        .display-mode-container .radio-container {
+            flex: 1;
+            margin: 0;
+            padding: 4px 6px;
+            background-color: #f0f5fa;
+            border: 1px solid #d5e3f0;
+            border-radius: 4px;
+            text-align: center;
+            transition: all 0.2s;
+            position: relative;
+        }
+        
+        .display-mode-container .radio-container:hover {
+            background-color: #e3eef8;
+            transform: translateY(-1px);
+        }
+        
+        .display-mode-container input[type="radio"] {
+            position: absolute;
+            opacity: 0;
+        }
+        
+        .display-mode-container input[type="radio"] + label {
+            display: block;
+            width: 100%;
+            font-size: 12px;
+            padding: 1px 0;
+            text-align: center;
+            font-weight: 500;
+        }
+        
+        .display-mode-container input[type="radio"]:checked + label {
+            color: #2980b9;
+        }
+        
+        .display-mode-container input[type="radio"]:checked + label::before {
+            content: '•';
+            display: inline-block;
+            font-size: 16px;
+            line-height: 1;
+            margin-right: 3px;
+            vertical-align: middle;
+        }
+        
+        .display-mode-container .radio-container.selected {
+            background-color: #d5e8f7;
+            border-color: #3498db;
+            transform: translateY(-1px);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+
+        /* Checkbox styling */
+        .checkbox-container {
+            display: flex;
+            align-items: center;
+            margin-bottom: 4px;
+            padding: 3px 6px;
+            border-radius: 4px;
+            transition: background-color 0.2s;
+            background-color: #f8f9fa;
+            border: 1px solid #eaeaea;
+        }
+
+        .checkbox-container:hover {
+            background-color: #f0f5fa;
+        }
+
+        input[type="checkbox"] {
+            margin-right: 6px;
+            width: 15px;
+            height: 15px;
+            accent-color: #3498db;
+        }
+
+        input[type="checkbox"] + label {
+            width: auto;
+            padding: 0;
+            margin: 0;
+            border: none;
+            font-weight: normal;
+            font-size: 12px;
+            cursor: pointer;
+        }
+        
+        input[type="checkbox"]:checked + label {
+            font-weight: 500;
+            color: #3498db;
+        }
+
+        /* Crime stats display */
+        .stats {
+            margin-top: 8px;
+            text-align: center;
+            font-size: 12px;
+            background-color: #f8f9fa;
+            border-radius: 5px;
+            padding: 4px;
+            border: 1px dashed #e0e0e0;
+        }
+
+        .crime-count {
+            font-size: 18px;
+            font-weight: bold;
+            color: #e74c3c;
+            display: block;
+            margin: 1px 0;
+        }
+        
+        /* Crime legend styling */
+        .crime-legend {
+            margin-top: 6px;
+            font-size: 11px;
+            background-color: #f8f9fa;
+            border-radius: 5px;
+            padding: 4px 6px;
+            border: 1px solid #eaeaea;
+        }
+        
+        .legend-title {
+            font-weight: 500;
+            margin-bottom: 3px;
+            font-size: 11px;
+            color: #555;
+            text-align: center;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 2px;
+        }
+        
+        .legend-item {
+            display: flex;
+            align-items: center;
+            margin: 2px 0;
+        }
+        
+        .legend-icon {
+            display: inline-block;
+            margin-right: 4px;
+            font-size: 13px;
+            width: 16px;
+        }
+
+        .footer {
+            text-align: center;
+            padding: 8px;
+            color: #7f8c8d;
+            font-size: 12px;
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 1000px) {
+            .container {
+                flex-direction: column;
+                height: auto;
+            }
+            
+            #map {
+                min-width: 100%;
+                height: 70vh;
+                min-height: 500px;
+            }
+            
+            .controls {
+                flex: 1;
+                width: 100%;
+                max-height: none;
+                overflow-y: visible;
+            }
+        }
+
+        .crime-marker {
+            background-color: rgba(231, 76, 60, 0.85);
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            border: 2px solid white;
+            box-shadow: 0 0 5px rgba(0,0,0,0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            color: white;
+            transform: translate(-50%, -50%);
+        }
+
+        .top-controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+            flex-wrap: wrap;
+            background-color: #f8f9fa;
+            padding: 6px 10px;
+            border-radius: 6px;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+        }
+        
+        .date-navigation {
+            background-color: white;
+            border-radius: 4px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            display: flex;
+            align-items: center;
+            padding: 4px 10px;
+            justify-content: center;
+            width: 100%;
+            margin: 0;
+            flex-direction: column;
+        }
+        
+        .date-navigation button {
+            background: none;
+            border: none;
+            font-size: 16px;
+            cursor: pointer;
+            padding: 0 8px;
+            color: #3498db;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 24px;
+            width: 24px;
+        }
+        
+        .date-controls-row {
+            display: flex;
+            align-items: center;
+            width: 100%;
+            justify-content: center;
+            margin-bottom: 6px;
+        }
+        
+        .date-navigation .current-date {
+            margin: 0 10px;
+            font-size: 13px;
+            font-weight: 500;
+            color: #333;
+            min-width: 80px;
+            text-align: center;
+        }
+        
+        .date-slider-container {
+            width: 100%;
+            padding: 0 10px;
+            margin-bottom: 2px;
+            position: relative;
+        }
+        
+        .date-slider {
+            width: 100%;
+            height: 6px;
+            -webkit-appearance: none;
+            appearance: none;
+            background: #e0e0e0;
+            outline: none;
+            border-radius: 3px;
+            cursor: pointer;
+            margin: 8px 0 4px;
+            position: relative;
+        }
+        
+        /* For webkit browsers like Chrome/Safari */
+        .date-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: #3498db;
+            cursor: pointer;
+            border: 2px solid white;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+            margin-top: -5px; /* Centers the thumb vertically */
+        }
+        
+        /* For Firefox */
+        .date-slider::-moz-range-thumb {
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: #3498db;
+            cursor: pointer;
+            border: 2px solid white;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+        }
+        
+        /* Track styling for webkit browsers */
+        .date-slider::-webkit-slider-runnable-track {
+            height: 6px;
+            border-radius: 3px;
+            background: linear-gradient(to right, #3498db 0%, #3498db 0%, #e0e0e0 0%, #e0e0e0 100%);
+        }
+        
+        /* Track styling for Firefox */
+        .date-slider::-moz-range-track {
+            height: 6px;
+            border-radius: 3px;
+            background: #e0e0e0;
+        }
+        
+        .date-slider::-moz-range-progress {
+            height: 6px;
+            border-radius: 3px;
+            background: #3498db;
+        }
+        
+        .date-range-labels {
+            display: flex;
+            justify-content: space-between;
+            font-size: 10px;
+            color: #777;
+            padding: 0 2px;
+            margin-top: 2px;
+        }
+        
+        .quick-layers {
+            background-color: white;
+            border-radius: 4px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            display: flex;
+            align-items: center;
+            padding: 4px 10px;
+            gap: 8px;
+            margin: 0;
+        }
+        
+        .layer-toggles {
+            display: flex;
+            gap: 6px;
+            align-items: center;
+        }
+        
+        .quick-layers label {
+            font-weight: 500;
+            color: #444;
+            margin-bottom: 0;
+            font-size: 12px;
+            white-space: nowrap;
+        }
+        
+        @media (max-width: 700px) {
+            .top-controls {
+                flex-direction: column;
+                gap: 10px;
+            }
+            
+            .date-navigation, .quick-layers {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+
+        .quick-layers .checkbox-container {
+            margin-bottom: 0;
+            padding: 1px 6px;
+            background-color: #f5f9fc;
+            border: 1px solid #d5e5f2;
+            border-radius: 3px;
+        }
+        
+        .quick-layers .checkbox-container:hover {
+            background-color: #e9f3fb;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="header">
+        <h1>Larceny in Raleigh (2022)</h1>
+        <h2>By: Maanav Jariwala</h2>
+    </div>
+    
+    <div class="content">
+        <div class="top-controls">
+            <div class="date-navigation">
+                <div class="date-controls-row">
+                    <button id="prevDate" title="Previous Day">◀</button>
+                    <span class="current-date" id="currentDate">Jan 1, 2022</span>
+                    <button id="nextDate" title="Next Day">▶</button>
+                </div>
+                <div class="date-slider-container">
+                    <input type="range" min="1" max="365" value="1" class="date-slider" id="dateSlider">
+                    <div class="date-range-labels">
+                        <span>Jan</span>
+                        <span>Mar</span>
+                        <span>Jun</span>
+                        <span>Sep</span>
+                        <span>Dec</span>
+                    </div>
+                </div>
+            </div>
+            <div class="quick-layers">
+                <label>Layers:</label>
+                <div class="layer-toggles">
+                    <div class="checkbox-container">
+                        <input type="checkbox" id="policeStations" checked>
+                        <label for="policeStations">Police</label>
+                    </div>
+                    <div class="checkbox-container">
+                        <input type="checkbox" id="parkingLots" checked>
+                        <label for="parkingLots">Parking</label>
+                    </div>
+                    <div class="checkbox-container">
+                        <input type="checkbox" id="universities" checked>
+                        <label for="universities">Colleges</label>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="container">
+            <div id="map"></div>
+            <div class="controls">
+        
+                <div class="panel time-panel">
+                    <h3>Time & Date</h3>
+                    <div class="date-controls">
+                        <label for="day">Select Date in 2022:</label>
+                        <input type="date" id="dayPicker" min="2022-01-01" max="2022-12-31" value="2022-01-01">
+                        
+                        <label for="timeCategory">Time of Day:</label>
+                        <div class="time-categories">
+                            <div class="radio-container">
+                                <input type="radio" id="timeAll" name="timeCategory" value="all" checked>
+                                <label for="timeAll">All Times</label>
+                        </div>
+                            <div class="radio-container">
+                                <input type="radio" id="timeMorning" name="timeCategory" value="morning">
+                                <label for="timeMorning">Morning (6AM-1PM)</label>
+                            </div>
+                            <div class="radio-container">
+                                <input type="radio" id="timeMidday" name="timeCategory" value="midday">
+                                <label for="timeMidday">Mid-day (1PM-10PM)</label>
+                            </div>
+                            <div class="radio-container">
+                                <input type="radio" id="timeNight" name="timeCategory" value="night">
+                                <label for="timeNight">Night (10PM-6AM)</label>
+                    </div>
+                </div>
+                
+                        <div class="display-mode-container">
+                            <label for="viewMode">Crime Display Mode:</label>
+                            <div class="display-modes">
+                                <div class="radio-container" id="markerContainer">
+                                    <input type="radio" id="viewMarkers" name="viewMode" value="markers" checked>
+                                    <label for="viewMarkers">Marker View</label>
+                                </div>
+                                <div class="radio-container" id="heatmapContainer">
+                                    <input type="radio" id="viewHeatmap" name="viewMode" value="heatmap">
+                                    <label for="viewHeatmap">Heatmap View</label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                
+                <div class="panel crime-panel">
+                    <h3>Crime Category</h3>
+                    <div class="type-controls">
+                        <label for="crimeType">Type of Larceny:</label>
+                        <select id="crimeType">
+                            <option value="all">All Larceny</option>
+                            <option value="35F">From Motor Vehicle</option>
+                            <option value="35D">From Building</option>
+                            <option value="35C">Shoplifting</option>
+                            <option value="35G">Motor Vehicle Parts</option>
+                            <option value="35A">Bicycle Theft</option>
+                            <option value="35H">Other Larceny</option>
+                        </select>
+                    </div>
+                    
+                    <div class="stats">
+                        <span class="crime-count" id="crimeCount">0</span> incidents found
+                    </div>
+                    
+                    <div class="crime-legend">
+                        <div class="legend-title">Icon Legend</div>
+                        <div class="legend-item"><span class="legend-icon">🚲</span> Bicycle Theft</div>
+                        <div class="legend-item"><span class="legend-icon">👜</span> Purse Snatching</div>
+                        <div class="legend-item"><span class="legend-icon">🛒</span> Shoplifting</div>
+                        <div class="legend-item"><span class="legend-icon">🏢</span> Building Theft</div>
+                        <div class="legend-item"><span class="legend-icon">🚗</span> Vehicle Theft</div>
+                        <div class="legend-item"><span class="legend-icon">🔧</span> Vehicle Parts</div>
+                        <div class="legend-item"><span class="legend-icon">💰</span> Other Larceny</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="footer">
+        <p>Data source: Raleigh Police Department Open Data</p>
+    </div>
+    
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://unpkg.com/leaflet.markercluster@1.4.1/dist/leaflet.markercluster.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+    <script src="https://unpkg.com/leaflet.heat@0.2.0/dist/leaflet-heat.js"></script>
+    <script>
+const map = L.map('map').setView([35.8200, -78.6382], 11.4);
+
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {}).addTo(map);
+
+
+// Function to update the slider track color
+function updateSliderTrackColor(slider) {
+    if (!slider) return;
+    
+    const value = slider.value;
+    const max = slider.max || 365;
+    const percentage = (value / max) * 100;
+    
+    // Update the background gradient to show blue for the portion that's been passed
+    slider.style.background = `linear-gradient(to right, #3498db 0%, #3498db ${percentage}%, #e0e0e0 ${percentage}%, #e0e0e0 100%)`;
+}
+
+// js portion maybe separate into different files for serpartion of concerns 
+
+// will cluster the crimes based on the location with the cluster marker
+const layers = {
+    crimes: L.markerClusterGroup({
+        maxClusterRadius: 30,
+        iconCreateFunction: function(cluster) {
+            return L.divIcon({
+                html: '<div class="cluster-marker">' + cluster.getChildCount() + '</div>',
+                className: 'marker-cluster',
+                iconSize: new L.Point(40, 40)
+            });
+        }
+    }),
+    heatmap: null, // Will be initialized when data is loaded
+// will display the police stations, universities, and parking lots 
+    policeStations: L.layerGroup(),
+    universities: L.layerGroup(),
+    parkingLots: L.layerGroup()  
+};
+
+// Add only visible layers to the map (heatmap will be initialized later)
+layers.crimes.addTo(map);
+layers.policeStations.addTo(map);
+layers.universities.addTo(map);
+layers.parkingLots.addTo(map);
+
+// Heatmap configuration
+const heatmapConfig = {
+    radius: 30,            // Increased from 25
+    blur: 12,              // Decreased from 15 for sharper edges
+    maxZoom: 16,
+    max: 1.0,              // Maximum intensity increased to 1.0
+    minOpacity: 0.6,       // Added minimum opacity to make even low values visible
+    gradient: {
+        0.0: '#0a0067',    // Dark indigo for even the lowest values
+        0.2: '#0a00ff',    // Bright blue
+        0.4: '#00cdcd',    // Cyan
+        0.6: '#ffff00',    // Bright yellow
+        0.8: '#ff3300',    // Bright orange-red
+        1.0: '#800000'     // Dark red
+    }
+};
+
+// View mode change handler (markers/heatmap)
+document.querySelectorAll('input[name="viewMode"]').forEach(radio => {
+    radio.addEventListener('change', updateViewMode);
+    
+    // Add click handler for the whole container
+    const container = radio.closest('.radio-container');
+    container.addEventListener('click', () => {
+        radio.checked = true;
+        updateViewMode();
+    });
+});
+
+// Initialize display mode containers
+function updateDisplayModeUI() {
+    const viewMode = document.querySelector('input[name="viewMode"]:checked').value;
+    const containers = document.querySelectorAll('.display-mode-container .radio-container');
+    
+    containers.forEach(container => {
+        container.classList.remove('selected');
+    });
+    
+    if (viewMode === 'markers') {
+        document.getElementById('markerContainer').classList.add('selected');
+    } else if (viewMode === 'heatmap') {
+        document.getElementById('heatmapContainer').classList.add('selected');
+    }
+}
+
+function updateViewMode() {
+    const viewMode = document.querySelector('input[name="viewMode"]:checked').value;
+    console.log("View mode changed to:", viewMode);
+    
+    updateDisplayModeUI();
+    
+    // Aggressively remove both layers first to ensure a clean state
+    if (map.hasLayer(layers.crimes)) {
+        console.log("Removing crimes layer");
+        map.removeLayer(layers.crimes);
+    }
+    
+    if (layers.heatmap && map.hasLayer(layers.heatmap)) {
+        console.log("Removing heatmap layer");
+        map.removeLayer(layers.heatmap);
+    }
+    
+    // Add back only the requested layer
+    if (viewMode === 'markers') {
+        console.log("Adding marker layer");
+        map.addLayer(layers.crimes);
+    } else if (viewMode === 'heatmap' && layers.heatmap) {
+        console.log("Adding heatmap layer");
+        map.addLayer(layers.heatmap);
+    } else if (viewMode === 'heatmap' && !layers.heatmap) {
+        console.log("Heatmap not available, refreshing map to create it");
+        // If heatmap is selected but not created yet, refresh the map
+        updateMapWithCurrentViewMode();
+    }
+}
+
+// Add custom CSS for standard markers used chat gpt to make the icons look better 
+const style = document.createElement('style');
+style.textContent = `
+    .marker-cluster {
+        background-color: rgba(255, 0, 0, 0.6);
+        border: 2px solid #fff;
+        border-radius: 50%;
+        color: white;
+        text-align: center;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+    }
+    .cluster-marker {
+        width: 100%;
+        height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    .standard-icon {
+        border-radius: 50%;
+        border: 2px solid white;
+        box-shadow: 0 0 5px rgba(0,0,0,0.3);
+        text-align: center;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    .police-station-icon {
+        background-color: #1a5fb4 !important;
+        width: 28px !important;
+        height: 28px !important;
+        color: white !important;
+    }
+    .crime-marker {
+        background-color: rgba(231, 76, 60, 0.85);
+        width: 24px;
+        height: 24px;
+        border-radius: 50%;
+        border: 2px solid white;
+        box-shadow: 0 0 5px rgba(0,0,0,0.5);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 16px;
+        color: white;
+        transform: translate(-50%, -50%);
+    }
+    .university-icon {
+        background-color: #ffa500;
+    }
+`;
+document.head.appendChild(style);
+
+
+function formatTime(hour) {
+    hour = parseInt(hour);
+    const period = hour >= 12 ? 'PM' : 'AM';
+    const displayHour = hour % 12 || 12;
+    return `${displayHour}:00 ${period}`;
+}
+
+// Add event listeners for time category radio buttons
+document.querySelectorAll('input[name="timeCategory"]').forEach(radio => {
+    radio.addEventListener('change', updateMap);
+});
+
+// this function fetches the police stations data and displays it on the map with the icon and popup with relavant information 
+function displayPoliceStations() {
+    layers.policeStations.clearLayers();
+    
+    console.log("Fetching police stations data...");
+    fetch('data/Police_Departments.geojson')
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok: ' + response.statusText);
+            }
+            return response.json();
+        })
+        .then(data => {
+            console.log("Police stations data loaded");
+            L.geoJSON(data, {
+                pointToLayer: (feature, latlng) => {
+                    return L.marker(latlng, {
+                        icon: L.divIcon({
+                            className: 'police-station-icon standard-icon',
+                            html: '👮',
+                            iconSize: [25, 25]
+                        })
+                    });
+                },
+                onEachFeature: (feature, layer) => {
+                    layer.bindPopup(`
+                        <strong>${feature.properties.AGENCY}</strong><br>
+                        ${feature.properties.SITE_ADDRE}<br>
+                        Type: ${feature.properties.TYPE_STATI}<br>
+                        Municipality: ${feature.properties.MUNICIPALI}
+                    `);
+                }
+            }).addTo(layers.policeStations);
+        })
+        .catch(error => console.error('Error loading police station data:', error));
+}
+
+function displayUniversities() {
+    layers.universities.clearLayers();
+    
+    console.log("Fetching universities data...");
+    fetch('data/Colleges_and_Universities.geojson')
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok: ' + response.statusText);
+            }
+            return response.json();
+        })
+        .then(data => {
+            console.log("Universities data loaded");
+            // Add universities using GeoJSON
+            L.geoJSON(data, {
+                pointToLayer: (feature, latlng) => {
+                    return L.marker(latlng, {
+                        icon: L.divIcon({
+                            className: 'university-icon standard-icon',
+                            html: '🎓',
+                            iconSize: [25, 25]
+                        })
+                    });
+                },
+                onEachFeature: (feature, layer) => {
+                    layer.bindPopup(`
+                        <strong>${feature.properties.COLLEGENAME}</strong><br>
+                        ${feature.properties.ADDRESS}<br>
+                        ${feature.properties.CITY}
+                    `);
+                }
+            }).addTo(layers.universities);
+        })
+        .catch(error => console.error('Error loading university data:', error));
+}
+
+function displayParkingLots() {
+    console.log("Fetching parking lot GeoJSON...");
+    fetch('data/Parking_Lots.geojson')
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok: ' + response.statusText);
+            }
+            return response.json();
+        })
+        .then(data => {
+            console.log("Parking lot data loaded:", data);
+            layers.parkingLots.clearLayers();
+            const parkingLayer = L.geoJSON(data, {
+                style: function(feature) {
+                    return {
+                        color: feature.properties.IMPERVIOUS === "YES" ? "#2c3e50" : "#34495e",
+                        weight: 2,
+                        fillColor: feature.properties.SUBTYPE === "PARKING_LOT" ? "#3498db" : "#2ecc71",
+                        fillOpacity: 0.4,
+                        dashArray: feature.properties.IMPERVIOUS === "YES" ? null : "5, 5"
+                    };
+                },
+                onEachFeature: function(feature, layer) {
+                    const updateDate = new Date(feature.properties.UPDATE_DATE).toLocaleDateString();
+                    const areaInSqMeters = feature.properties.Shape__Area.toFixed(2);
+                    const description = feature.properties.DESCRIPTION || "Parking Lot";
+                    
+                    layer.bindPopup(`
+                        <div style="min-width: 200px;">
+                            <strong>${description}</strong><br>
+                            <strong>Type:</strong> ${feature.properties.SUBTYPE}<br>
+                            <strong>Surface:</strong> ${feature.properties.IMPERVIOUS === "YES" ? "Paved" : "Unpaved"}<br>
+                            <strong>Last Updated:</strong> ${updateDate}
+                        </div>
+                    `);
+    
+                    //Adding hover effect to change fill opacity
+                    layer.on({
+                        mouseover: function(e) {
+                            layer.setStyle({ fillOpacity: 0.7 });
+                        },
+                        mouseout: function(e) {
+                            layer.setStyle({ fillOpacity: 0.4 });
+                        }
+                    });
+                }
+            });
+            
+            layers.parkingLots.addLayer(parkingLayer);
+            console.log("Parking lot layer added to group.");
+        })
+        .catch(error => console.error('Error loading parking lot data:', error));
+}
+
+// this function updates the visibility of the layers based on the checkboxes through the event listeners 
+function updateLayerVisibility() {
+    // default is all layers are visible but can be changed through the checkboxes maybe can change depending on rendering speed
+    const policeVisible = document.getElementById('policeStations').checked;
+    const uniVisible = document.getElementById('universities').checked;
+    const parkingVisible = document.getElementById('parkingLots').checked;
+    
+    if (policeVisible) {
+        map.addLayer(layers.policeStations);
+    } else {
+        map.removeLayer(layers.policeStations);
+    }
+    
+    if (uniVisible) {
+        map.addLayer(layers.universities);
+    } else {
+        map.removeLayer(layers.universities);
+    }
+    
+    if (parkingVisible) {
+        map.addLayer(layers.parkingLots);
+    } else {
+        map.removeLayer(layers.parkingLots);
+    }
+}
+
+// Helper function to count markers in a layer
+function countMarkersInLayer(layer) {
+    let count = 0;
+    if (layer && layer.eachLayer) {
+        layer.eachLayer(() => { count++; });
+    }
+    return count;
+}
+
+// Event listeners for the date picker, crime type, and the checkboxes for the layers that work by calling the updateMap function 
+document.getElementById('dayPicker').addEventListener('change', updateMap);
+document.getElementById('crimeType').addEventListener('change', updateMap);
+
+document.getElementById('policeStations').addEventListener('change', updateLayerVisibility);
+document.getElementById('universities').addEventListener('change', updateLayerVisibility);
+document.getElementById('parkingLots').addEventListener('change', updateLayerVisibility);
+
+function updateMap() {
+    updateMapWithCurrentViewMode();
+}
+
+// Event listeners for date navigation
+document.getElementById('prevDate').addEventListener('click', function() {
+    navigateDate(-1)();
+});
+document.getElementById('nextDate').addEventListener('click', function() {
+    navigateDate(1)();
+});
+
+// Date slider functionality
+document.addEventListener('DOMContentLoaded', function() {
+    const dateSlider = document.getElementById('dateSlider');
+    if (dateSlider) {
+        // Initial color update
+        updateSliderTrackColor(dateSlider);
+        
+        dateSlider.addEventListener('input', function() {
+            updateDateFromSlider(this.value);
+            updateSliderTrackColor(this);
+        });
+        
+        dateSlider.addEventListener('change', function() {
+            updateSliderTrackColor(this);
+        });
+    } else {
+        console.error("dateSlider element not found");
+    }
+});
+
+// Function to update date from day of year
+function updateDateFromSlider(dayOfYear) {
+    try {
+        console.log("Updating date from slider value:", dayOfYear);
+        const date = new Date(2022, 0, 1);
+        date.setDate(date.getDate() + parseInt(dayOfYear) - 1);
+        
+        // Format date as YYYY-MM-DD for the input
+        const year = date.getFullYear();
+        const month = (date.getMonth() + 1).toString().padStart(2, '0');
+        const day = date.getDate().toString().padStart(2, '0');
+        const formattedDate = `${year}-${month}-${day}`;
+        
+        console.log("Setting date picker to:", formattedDate);
+        
+        // Update the date picker value
+        const dayPicker = document.getElementById('dayPicker');
+        if (dayPicker) {
+            dayPicker.value = formattedDate;
+            
+            // Update the displayed date and refresh the map
+            updateCurrentDateDisplay();
+            
+            // Instead of calling updateMap directly, use a custom update to ensure view modes are handled correctly
+            updateMapWithCurrentViewMode();
+        } else {
+            console.error("dayPicker element not found");
+        }
+    } catch (error) {
+        console.error("Error in updateDateFromSlider:", error);
+    }
+}
+
+// Function to update map with current view mode preserved
+function updateMapWithCurrentViewMode() {
+    // Get current view mode
+    const viewMode = document.querySelector('input[name="viewMode"]:checked').value;
+    console.log("Updating map with view mode:", viewMode);
+    
+    // Update map data
+    const filters = {
+        day: document.getElementById('dayPicker').value,
+        timeCategory: document.querySelector('input[name="timeCategory"]:checked').value,
+        crimeType: document.getElementById('crimeType').value
+    };
+    
+    // Clear both layers first
+    layers.crimes.clearLayers();
+    if (layers.heatmap && map.hasLayer(layers.heatmap)) {
+        map.removeLayer(layers.heatmap);
+        layers.heatmap = null;
+    }
+    
+    // Then update data and apply the correct view mode
+    displayCrimeData(filters, viewMode);
+}
+
+// Function to update slider value from date
+function updateSliderFromDate() {
+    try {
+        const datePicker = document.getElementById('dayPicker');
+        const dateSlider = document.getElementById('dateSlider');
+        
+        if (!datePicker || !dateSlider) {
+            console.error("Required elements not found", {datePicker, dateSlider});
+            return;
+        }
+        
+        const [year, month, day] = datePicker.value.split('-').map(Number);
+        const date = new Date(year, month - 1, day);
+        
+        // Calculate day of year (1-365)
+        const start = new Date(2022, 0, 0); // Dec 31, 2021
+        const diff = date - start;
+        const dayOfYear = Math.floor(diff / 86400000);
+        
+        console.log("Setting slider to day:", dayOfYear, "for date:", date.toISOString());
+        
+        // Update slider
+        dateSlider.value = dayOfYear;
+        
+        // Update slider track color
+        updateSliderTrackColor(dateSlider);
+    } catch (error) {
+        console.error("Error in updateSliderFromDate:", error);
+    }
+}
+
+// Function to update the displayed date
+function updateCurrentDateDisplay() {
+    try {
+        const datePicker = document.getElementById('dayPicker');
+        const currentDateElement = document.getElementById('currentDate');
+        
+        if (!datePicker || !currentDateElement) {
+            console.error("Required elements not found in updateCurrentDateDisplay");
+            return;
+        }
+        
+        // Create a date from the input value
+        const [year, month, day] = datePicker.value.split('-').map(Number);
+        const currentDate = new Date(year, month - 1, day);
+        
+        // Format the date to display
+        const formatter = new Intl.DateTimeFormat('en-US', { 
+            month: 'short', 
+            day: 'numeric', 
+            year: 'numeric' 
+        });
+        currentDateElement.textContent = formatter.format(currentDate);
+        
+        console.log("Updated date display to:", currentDateElement.textContent);
+    } catch (error) {
+        console.error("Error in updateCurrentDateDisplay:", error);
+    }
+}
+
+// Update current date display when date picker changes
+document.getElementById('dayPicker').addEventListener('change', function() {
+    updateCurrentDateDisplay();
+    updateSliderFromDate();
+});
+
+// Function to navigate through dates
+function navigateDate(direction) {
+    return function() {
+        try {
+            const datePicker = document.getElementById('dayPicker');
+            
+            if (!datePicker) {
+                console.error("dayPicker element not found in navigateDate");
+                return;
+            }
+            
+            // Create a date from the input value
+            const [year, month, day] = datePicker.value.split('-').map(Number);
+            const currentDate = new Date(year, month - 1, day);
+            
+            // Add or subtract days
+            currentDate.setDate(currentDate.getDate() + direction);
+            
+            const newYear = currentDate.getFullYear();
+            
+            // Ensure date is within 2022
+            if (newYear === 2022) {
+                // Format date as YYYY-MM-DD for the input
+                const newMonth = (currentDate.getMonth() + 1).toString().padStart(2, '0');
+                const newDay = currentDate.getDate().toString().padStart(2, '0');
+                const formattedDate = `${newYear}-${newMonth}-${newDay}`;
+                
+                console.log("Navigating to date:", formattedDate);
+                
+                // Update the date picker value
+                datePicker.value = formattedDate;
+                
+                // Update the displayed date, slider, and refresh the map
+                updateCurrentDateDisplay();
+                updateSliderFromDate();
+                
+                // Use the custom update to ensure view modes are handled correctly
+                updateMapWithCurrentViewMode();
+            }
+        } catch (error) {
+            console.error("Error in navigateDate:", error);
+        }
+    };
+}
+
+function initMap() {
+    console.log("Initializing map...");
+    
+    // Initialize map layers
+    displayPoliceStations();
+    displayUniversities();
+    displayParkingLots();
+
+    // Set initial form values
+    document.getElementById('dayPicker').value = '2022-01-01';
+    document.getElementById('timeAll').checked = true;
+    document.getElementById('viewMarkers').checked = true;
+    
+    document.getElementById('policeStations').checked = true;
+    document.getElementById('universities').checked = true;
+    document.getElementById('parkingLots').checked = true; 
+    
+    // Initialize the date slider
+    const dateSlider = document.getElementById('dateSlider');
+    if (dateSlider) {
+        dateSlider.value = 1; // January 1
+        updateSliderTrackColor(dateSlider);
+        console.log("Date slider initialized");
+    } else {
+        console.error("Date slider element not found during initialization");
+    }
+    
+    // Make sure the correct layers are visible
+    updateLayerVisibility();
+    updateDisplayModeUI();
+    updateCurrentDateDisplay();
+    
+    // Clear any map layers that might have been added already
+    if (map.hasLayer(layers.crimes)) {
+        map.removeLayer(layers.crimes);
+    }
+    
+    if (layers.heatmap && map.hasLayer(layers.heatmap)) {
+        map.removeLayer(layers.heatmap);
+    }
+    
+    // Initialize map data with the initial filter state
+    updateMapWithCurrentViewMode();
+    
+    console.log("Map initialization complete");
+}
+
+function displayCrimeData(filters, forcedViewMode) {
+    // Always clear both layers when loading new data
+    // This helps avoid the issue of both layers showing up
+    layers.crimes.clearLayers();
+    if (map.hasLayer(layers.crimes)) {
+        map.removeLayer(layers.crimes);
+    }
+    
+    if (layers.heatmap) {
+        if (map.hasLayer(layers.heatmap)) {
+            map.removeLayer(layers.heatmap);
+        }
+        // Destroy the heatmap layer completely
+        layers.heatmap = null;
+    }
+    
+    console.log("Fetching and filtering crime data with:", filters);
+    console.log("Selected date:", new Date(filters.day).toISOString());
+    
+    // Use PapaParse to handle CSV parsing
+    Papa.parse('data/Raleigh_Police_Incidents_(NIBRS).csv', {
+        download: true,
+        header: true,
+        skipEmptyLines: true,
+        dynamicTyping: true, // Automatically convert strings to numbers when possible
+        complete: function(results) {
+            console.log("CSV parsing complete", results.meta.fields);
+            
+            // Create GeoJSON features array and heatmap points array
+            const features = [];
+            const heatmapPoints = [];
+            let crimeCount = 0;
+            
+            // Filter the data
+            const filteredData = results.data.filter(row => {
+                // Skip records with invalid coordinates (0 or null)
+                if (!row.latitude || !row.longitude || row.latitude === 0 || row.longitude === 0) return false;
+                
+                // Only include larceny crimes
+                if (!row.crime_category || row.crime_category !== 'LARCENY') return false;
+                
+                // Filter based on date
+                if (row.reported_date) {
+                    // Parse the reported date from the CSV (format: "2022/01/04 23:16:00+00")
+                    const reportedDate = new Date(row.reported_date);
+                    
+                    // Parse the selected date from the date picker (format: "2022-01-01")
+                    // and ensure we handle it as UTC to avoid timezone issues
+                    const [year, month, day] = filters.day.split('-').map(Number);
+                    const selectedDate = new Date(Date.UTC(year, month - 1, day));
+                    
+                    // Get the date parts for comparison
+                    const reportedYear = reportedDate.getUTCFullYear();
+                    const reportedMonth = reportedDate.getUTCMonth();
+                    const reportedDay = reportedDate.getUTCDate();
+                    
+                    const selectedYear = selectedDate.getUTCFullYear();
+                    const selectedMonth = selectedDate.getUTCMonth();
+                    const selectedDay = selectedDate.getUTCDate();
+                    
+                    // Check if dates match (comparing year, month, and day)
+                    if (reportedYear !== selectedYear || 
+                        reportedMonth !== selectedMonth || 
+                        reportedDay !== selectedDay) {
+                        return false;
+                    }
+                    
+                    // For time category filtering, use the actual timestamp hour
+                    // This ensures consistency with what's shown in the popup
+                    const hourOfDay = reportedDate.getUTCHours();
+                    
+                    // Skip time filtering if "All Times" is selected
+                    if (filters.timeCategory !== 'all') {
+                        if (filters.timeCategory === 'morning') {
+                            // Morning: 6:00 AM - 12:59 PM (hours 6-12)
+                            if (hourOfDay < 6 || hourOfDay > 12) return false;
+                        } else if (filters.timeCategory === 'midday') {
+                            // Mid-day: 1:00 PM - 9:59 PM (hours 13-21)
+                            if (hourOfDay < 13 || hourOfDay > 21) return false;
+                        } else if (filters.timeCategory === 'night') {
+                            // Night: 10:00 PM - 5:59 AM (hours 22-23 and 0-5)
+                            if (hourOfDay >= 6 && hourOfDay <= 21) return false;
+                        }
+                    }
+                    
+                } else {
+                    return false; // Skip rows with no date
+                }
+                
+                // Filter by crime type
+                if (filters.crimeType !== 'all') {
+                    if (!row.crime_code || row.crime_code !== filters.crimeType) {
+                        return false;
+                    }
+                }
+                
+                return true;
+            });
+            
+            // Create GeoJSON features from filtered data
+            filteredData.forEach(row => {
+                // Create feature for marker view
+                const feature = {
+                    type: 'Feature',
+                    geometry: {
+                        type: 'Point',
+                        coordinates: [row.longitude, row.latitude]
+                    },
+                    properties: {
+                        case_number: row.case_number,
+                        crime_description: row.crime_description,
+                        reported_date: row.reported_date,
+                        reported_block_address: row.reported_block_address,
+                        district: row.district,
+                        crime_code: row.crime_code,
+                        reported_hour: row.reported_hour
+                    }
+                };
+                
+                // Add point for heatmap
+                heatmapPoints.push([row.latitude, row.longitude, 1]); // [lat, lng, intensity]
+                
+                features.push(feature);
+                crimeCount++;
+            });
+            
+            // Create GeoJSON object
+            const geoJson = {
+                type: 'FeatureCollection',
+                features: features
+            };
+            
+            // Get crime type name for logging
+            let crimeTypeName = "All Larceny";
+            if (filters.crimeType !== 'all') {
+                switch(filters.crimeType) {
+                    case '35A': crimeTypeName = 'Bicycle Theft'; break;
+                    case '35B': crimeTypeName = 'Purse Snatching'; break;
+                    case '35C': crimeTypeName = 'Shoplifting'; break;
+                    case '35D': crimeTypeName = 'Theft from Building'; break;
+                    case '35E': crimeTypeName = 'Theft from Coin-Operated Machine'; break;
+                    case '35F': crimeTypeName = 'Theft from Motor Vehicle'; break;
+                    case '35G': crimeTypeName = 'Theft of Motor Vehicle Parts'; break;
+                    case '35H': crimeTypeName = 'Other Larceny'; break;
+                }
+            }
+            
+            console.log(`Showing ${crimeCount} ${crimeTypeName} incidents for ${filters.day} during ${filters.timeCategory}`);
+            
+            // Add features to the markers layer
+            L.geoJSON(geoJson, {
+                pointToLayer: (feature, latlng) => {
+                    // Determine icon based on crime type
+                    let iconContent = "🔍"; // Default
+                    
+                    if (feature.properties.crime_code) {
+                        switch(feature.properties.crime_code) {
+                            case '35A': iconContent = "🚲"; break; // Bicycle theft
+                            case '35B': iconContent = "👜"; break; // Purse snatching
+                            case '35C': iconContent = "🛒"; break; // Shoplifting
+                            case '35D': iconContent = "🏢"; break; // Theft from building
+                            case '35E': iconContent = "🎰"; break; // Coin-operated machine
+                            case '35F': iconContent = "🚗"; break; // Motor vehicle
+                            case '35G': iconContent = "🔧"; break; // Motor vehicle parts
+                            case '35H': iconContent = "💰"; break; // Other larceny
+                            default: iconContent = "🔍";
+                        }
+                    }
+                    
+                    return L.marker(latlng, {
+                        icon: L.divIcon({
+                            className: 'crime-marker',
+                            html: iconContent,
+                            iconSize: [24, 24],
+                            iconAnchor: [12, 12]
+                        })
+                    });
+                },
+                onEachFeature: (feature, layer) => {
+                    const crimeCode = feature.properties.crime_code || '';
+                    let crimeType = '';
+                    
+                    // Add more descriptive crime type based on code
+                    switch(crimeCode) {
+                        case '35A': crimeType = 'Theft - Bicycle'; break;
+                        case '35B': crimeType = 'Theft - Purse Snatching'; break;
+                        case '35C': crimeType = 'Shoplifting'; break;
+                        case '35D': crimeType = 'Theft from Building'; break;
+                        case '35E': crimeType = 'Theft from Coin-Operated Machine'; break;
+                        case '35F': crimeType = 'Theft from Motor Vehicle'; break;
+                        case '35G': crimeType = 'Theft of Motor Vehicle Parts'; break;
+                        case '35H': crimeType = 'All Other Larceny'; break;
+                        default: crimeType = 'Unknown Larceny Type';
+                    }
+                    
+                    layer.bindPopup(`
+                        <strong>Case #${feature.properties.case_number}</strong><br>
+                        <strong>Type:</strong> ${crimeType}<br>
+                        ${feature.properties.crime_description}<br>
+                        <strong>Location:</strong> ${feature.properties.reported_block_address}<br>
+                        <strong>District:</strong> ${feature.properties.district}<br>
+                        <strong>Timestamp:</strong> ${new Date(feature.properties.reported_date).toLocaleString(undefined, {
+                            year: 'numeric',
+                            month: 'numeric',
+                            day: 'numeric',
+                            hour: '2-digit',
+                            minute: '2-digit',
+                            second: '2-digit',
+                            hour12: true
+                        })}<br>
+                        <strong>Reported Hour Category:</strong> ${feature.properties.reported_hour || 'Unknown'}
+                    `);
+                }
+            }).addTo(layers.crimes);
+            
+            // Only create heatmap if we have points
+            if (heatmapPoints.length > 0) {
+                // Create a single heatmap layer from all points
+                layers.heatmap = L.heatLayer(heatmapPoints, heatmapConfig);
+                
+                // Get the view mode, checking if a specific mode was forced
+                const viewMode = forcedViewMode || document.querySelector('input[name="viewMode"]:checked').value;
+                console.log("Applying view mode:", viewMode);
+                
+                // Double check to ensure only ONE layer is shown
+                if (map.hasLayer(layers.crimes)) {
+                    console.log("Removing crimes layer that shouldn't be there");
+                    map.removeLayer(layers.crimes);
+                }
+                
+                if (layers.heatmap && map.hasLayer(layers.heatmap)) {
+                    console.log("Removing heatmap layer that shouldn't be there");
+                    map.removeLayer(layers.heatmap);
+                }
+                
+                // Now add only the correct layer
+                if (viewMode === 'heatmap') {
+                    map.addLayer(layers.heatmap);
+                    console.log("Added heatmap layer");
+                } else {
+                    map.addLayer(layers.crimes);
+                    console.log("Added marker layer");
+                }
+            } else {
+                console.log("No crime points to display in heatmap");
+                // If no points, make sure at least the marker layer is there (even if empty)
+                if (!map.hasLayer(layers.crimes)) {
+                    map.addLayer(layers.crimes);
+                }
+            }
+            
+            // Update crime count display
+            document.getElementById('crimeCount').textContent = crimeCount;
+        },
+        error: function(error) {
+            console.error('Error parsing CSV:', error);
+        }
+    });
+}
+
+initMap();
+    </script>
+</body>
+
+</html>
